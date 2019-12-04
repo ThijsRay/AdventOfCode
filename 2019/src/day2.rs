@@ -1,24 +1,26 @@
-use advent_of_code as aoc;
+use aoc_runner_derive::{aoc, aoc_generator};
 
-fn main() {
-    let input: Vec<usize> = aoc::read_stdin()
-        .iter()
+#[aoc_generator(day2)]
+pub fn generator(input: &str) -> Vec<usize> {
+    input
+        .lines()
         .flat_map(|x| x.split(','))
         .map(|x| x.parse::<usize>().unwrap())
-        .collect();
-
-    println!("Part 1: {}", part1(input.clone()));
-    println!("Part 2: {}", part2(input.clone()));
+        .collect()
 }
 
-fn part1(mut input: Vec<usize>) -> usize {
+#[aoc(day2, part1)]
+pub fn part1(input: &Vec<usize>) -> usize {
+    let mut input = input.clone();
     input[1] = 12;
     input[2] = 2;
     intcode(&mut input);
     input[0]
 }
 
-fn part2(input: Vec<usize>) -> usize {
+#[aoc(day2, part2)]
+pub fn part2(input: &Vec<usize>) -> usize {
+    let input = input.clone();
     for noun in 0..=99 {
         for verb in 0..=99 {
             let mut run = input.clone();
@@ -52,7 +54,7 @@ fn intcode(code: &mut Vec<usize>) {
 
 #[cfg(test)]
 mod tests {
-    use crate::intcode;
+    use super::*;
 
     #[test]
     fn test_simple_add_intcode() {

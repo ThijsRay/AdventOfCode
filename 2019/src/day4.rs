@@ -1,14 +1,26 @@
-const UPPER_BOUND: usize = 265275;
-const LOWER_BOUND: usize = 781584;
+use aoc_runner_derive::{aoc, aoc_generator};
 
-fn main() {
-    println!("Part 1: {}", run(false));
-    println!("Part 2: {}", run(true))
+#[aoc_generator(day4)]
+pub fn input_generator(input: &str) -> (usize, usize) {
+    let output: Vec<usize> = input
+        .split('-')
+        .map(|x| x.parse::<usize>().unwrap())
+        .collect();
+
+    (output[0], output[1])
 }
 
-fn run(part2: u8) {
-    (UPPER_BOUND..LOWER_BOUND)
-        .filter(|x| matches_critera(*x, part2))
+#[aoc(day4, part1)]
+pub fn part1(input: &(usize, usize)) -> usize {
+    ((input.0)..(input.1))
+        .filter(|x| matches_critera(*x, false))
+        .count()
+}
+
+#[aoc(day4, part2)]
+pub fn part2(input: &(usize, usize)) -> usize {
+    ((input.0)..(input.1))
+        .filter(|x| matches_critera(*x, true))
         .count()
 }
 
@@ -53,7 +65,7 @@ fn matches_critera(number: usize, part2: bool) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::matches_critera;
+    use super::*;
 
     #[test]
     fn test_found_pair_same() {

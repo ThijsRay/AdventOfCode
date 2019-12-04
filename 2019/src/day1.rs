@@ -1,13 +1,18 @@
-use advent_of_code as aoc;
+use aoc_runner_derive::{aoc, aoc_generator};
 
-fn main() {
-    let input: Vec<i64> = aoc::read_stdin()
-        .iter()
-        .map(|x| x.parse::<i64>().unwrap())
-        .collect();
+#[aoc_generator(day1)]
+fn generator(input: &str) -> Vec<i64> {
+    input.lines().map(|x| x.parse::<i64>().unwrap()).collect()
+}
 
-    println!("{}", &input.iter().map(fuel).sum::<i64>());
-    println!("{}", &input.iter().map(fuel2).sum::<i64>());
+#[aoc(day1, part1)]
+pub fn part1(input: &[i64]) -> i64 {
+    input.iter().map(fuel).sum()
+}
+
+#[aoc(day1, part2)]
+pub fn part2(input: &[i64]) -> i64 {
+    input.iter().map(fuel2).sum()
 }
 
 fn fuel(mass: &i64) -> i64 {
@@ -26,7 +31,7 @@ fn fuel2(mass: &i64) -> i64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{fuel, fuel2};
+    use super::*;
 
     #[test]
     fn test_fuel() {
