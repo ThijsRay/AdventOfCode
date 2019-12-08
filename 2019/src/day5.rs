@@ -9,6 +9,7 @@ pub fn generator(input: &str) -> Vec<isize> {
         .collect()
 }
 
+#[derive(Debug)]
 enum AddressingMode {
     Position,
     Immediate,
@@ -41,6 +42,7 @@ impl AddressingMode {
     }
 }
 
+#[derive(Debug)]
 enum InstructionType {
     Add,
     Multiply,
@@ -84,6 +86,7 @@ impl InstructionType {
     }
 }
 
+#[derive(Debug)]
 struct Instruction {
     instruction: InstructionType,
     addressing: Vec<AddressingMode>,
@@ -116,18 +119,30 @@ impl Instruction {
 #[aoc(day5, part1)]
 pub fn part1(input: &Vec<isize>) -> isize {
     let input = input.clone();
-    intcode(1, input)
+    intcode(vec![1], input)
 }
 
 #[aoc(day5, part2)]
 pub fn part2(input: &Vec<isize>) -> isize {
     let input = input.clone();
-    intcode(5, input)
+    intcode(vec![5], input)
 }
 
-fn intcode(input: isize, mut code: Vec<isize>) -> isize {
-    let mut output = 0;
-    let mut i: usize = 0;
+pub struct Intcode {
+    pub code: Option<Vec<isize>>,
+    pub input: Vec<isize>,
+    pub output: isize,
+    pub instruction_pointer: usize,
+}
+
+pub fn intcode_raw(
+    mut input: Vec<isize>,
+    mut code: Vec<isize>,
+    ip: usize,
+    last_output: isize,
+) -> Intcode {
+    let mut output = last_output;
+    let mut i: usize = ip;
     loop {
         if i >= code.len() {
             break;
@@ -164,10 +179,15 @@ fn intcode(input: isize, mut code: Vec<isize>) -> isize {
 
                 set_value!(2, value)
             }
-            InstructionType::Input => set_value!(0, input),
+            InstructionType::Input => set_value!(0, input.pop().unwrap()),
             InstructionType::Output => {
                 output = get_value!(0);
-                println!("{}", output);
+                return Intcode {
+                    code: Some(code),
+                    input,
+                    output,
+                    instruction_pointer: i + instr.instruction.width(),
+                };
             }
             InstructionType::JumpIfTrue => {
                 if get_value!(0) != 0 {
@@ -201,10 +221,29 @@ fn intcode(input: isize, mut code: Vec<isize>) -> isize {
                 }
                 set_value!(2, value)
             }
-            InstructionType::Halt => return output,
+            InstructionType::Halt => {
+                return Intcode {
+                    code: None,
+                    input,
+                    output,
+                    instruction_pointer: i + instr.instruction.width(),
+                }
+            }
         };
-
         i += instr.instruction.width();
     }
-    output
+    Intcode {
+        code: None,
+        input,
+        output,
+        instruction_pointer: i,
+    }
+}
+
+pub fn intcode(input: Vec<isize>, code: Vec<isize>) -> isize {
+    let mut x = intcode_raw(input, code, 0, 0);
+    while let Some(code) = x.code {
+        x = intcode_raw(x.input, code, x.instruction_pointer, x.output);
+    }
+    x.output
 }
